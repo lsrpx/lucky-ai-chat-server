@@ -2,13 +2,15 @@ const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
-  cors: { origin: "*" }
+  cors: { origin: "*" } // local dev aur deployment ke liye open
 });
 const path = require('path');
 
-app.use(express.static(path.join(__dirname, '../'))); // serve user-client & admin-client
+// Serve both user-client & admin-client
+app.use('/user', express.static(path.join(__dirname, '../user-client')));
+app.use('/admin', express.static(path.join(__dirname, '../admin-client')));
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000; // Render ke liye dynamic port
 
 // In-memory storage
 let sessions = {}; // { sessionId: [{role:'user'|'assistant', text, ts}] }
@@ -19,9 +21,9 @@ function genSessionId() {
   return 'S' + Math.random().toString(36).substring(2, 8);
 }
 
-// Serve index.html if root is accessed (optional)
+// Optional root route
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../user-client/index.html'));
+  res.send('Lucky AI Chat Server is running!');
 });
 
 // ----- Socket.io -----
@@ -87,6 +89,4 @@ adminNS.on('connection', socket => {
 });
 
 // Start server
-http.listen(PORT, () => console.log(`Server listening on http://localhost:${PORT}`));
-app.use(express.static(path.join(__dirname, 'user-client')));
-app.use('/admin', express.static(path.join(__dirname, 'admin-client')));
+http.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
