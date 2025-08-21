@@ -88,3 +88,5 @@ adminNS.on('connection', socket => {
 
 // Start server
 http.listen(PORT, () => console.log(`Server listening on http://localhost:${PORT}`));
+app.use(express.static(path.join(__dirname, 'user-client')));
+app.use('/admin', express.static(path.join(__dirname, 'admin-client')));
